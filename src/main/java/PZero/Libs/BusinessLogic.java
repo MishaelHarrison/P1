@@ -159,7 +159,7 @@ public class BusinessLogic implements IBusinessLogic {
     @Override
     public ArrayList<account> getUserAccounts(user loggedUser) throws BadLogin, BusinessException {
         ArrayList<account> ret = new ArrayList<>();
-        if (login(loggedUser.getUsername(), loggedUser.getPassword())!= null){
+        if (loggedUser != null && login(loggedUser.getUsername(), loggedUser.getPassword())!= null){
             ArrayList<accountEntity> query = data.getAccountsFromUser(loggedUser.getId());
             for (accountEntity i :query) {
                 ret.add(new account(

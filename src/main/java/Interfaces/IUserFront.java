@@ -1,5 +1,5 @@
 package Interfaces;
 
 public interface IUserFront {
-    void menu();
+    void start();
 }

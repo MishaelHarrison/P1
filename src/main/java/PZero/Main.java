@@ -12,9 +12,9 @@ public class Main {
                 "Mishael",
                 "ToastToast"
         );
-        new UserFront(System.in,
+        new UserFront(
                 new BusinessLogic(
                 new BankData("p0")))
-                .menu();
+                .start();
     }
 }

@@ -52,19 +52,19 @@ public class user {
         this.password = password;
     }
 
-    public boolean isEmployee() {
-        return isEmployee;
-    }
-
-    public void setEmployee(boolean employee) {
-        isEmployee = employee;
-    }
-
     public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isEmployee() {
+        return isEmployee;
+    }
+
+    public void setEmployee(boolean employee) {
+        isEmployee = employee;
     }
 }
