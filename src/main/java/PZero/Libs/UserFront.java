@@ -20,7 +20,7 @@ import java.util.Scanner;
 
 public class UserFront implements IUserFront {
 
-    private static final Logger log=Logger.getLogger(UserFront.class);
+    //private static final Logger log=Logger.getLogger(UserFront.class);
 
     private user loggedUser;
     private String userState = "none";
