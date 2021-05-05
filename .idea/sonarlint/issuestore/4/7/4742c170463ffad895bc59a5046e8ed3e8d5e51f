@@ -1,39 +1,0 @@
-
-t	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(Ÿ¥©Şúÿÿÿÿ
-H
-java:S1128"-Remove this unused import 'java.util.Arrays'.(î–˜Éüÿÿÿÿ
-T
-java:S1128"9Remove this unused import 'Exceptions.InsufficientFunds'.(Û±‡­şÿÿÿÿ
-O
-java:S1128"9Remove this unused import 'Exceptions.BusinessException'.(¦’„
-I
-java:S1128".Remove this unused import 'java.util.Scanner'.(ÒÜÅ¸úÿÿÿÿ
-J
-java:S1128
-"/Remove this unused import 'Models.transaction'.(ı¸—ûúÿÿÿÿ
-Q
-java:S1128	"6Remove this unused import 'Models.pendingTransaction'.(šë ùÿÿÿÿ
-M
-java:S1128"2Remove this unused import 'java.util.Collections'.(¢³ïÓşÿÿÿÿ
-F
-java:S1128"0Remove this unused import 'java.io.InputStream'.(¹»º
-<
-java:S1170"!Make this final field static too.(–ÊØˆÿÿÿÿÿ
-7
-java:S1170"!Make this final field static too.(ÃÆ®î
-G
-java:S1612#",Replace this lambda with a method reference.(š©ú¯úÿÿÿÿ
-G
-java:S1602#",Remove useless curly braces around statement(š©ú¯úÿÿÿÿ
-=
-java:S1068"'Remove this unused "log" private field.(†ö–È
-I
-java:S1068".Remove this unused "loggedUser" private field.(âŒÈÚøÿÿÿÿ
-H
-java:S1068"-Remove this unused "userState" private field.(…Ìªßúÿÿÿÿ
-G
-java:S1068"1Remove this unused "adminPassword" private field.(…Ò¦ö
-J
-java:S1068"/Remove this unused "doubleRegex" private field.(–ÊØˆÿÿÿÿÿ
-G
-java:S1068"1Remove this unused "adminUsername" private field.(ÃÆ®î
