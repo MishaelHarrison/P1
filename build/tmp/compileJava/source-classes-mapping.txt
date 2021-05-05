@@ -1,5 +1,5 @@
-Exceptions/InsufficientFunds.java
- Exceptions.InsufficientFunds
+PZero/Main.java
+ PZero.Main
 PZero/Libs/DAO/Entities/userEntity.java
  PZero.Libs.DAO.Entities.userEntity
 PZero/Libs/DAO/Entities/transactionEntity.java
@@ -10,12 +10,12 @@ Interfaces/IUserFront.java
  Interfaces.IUserFront
 PZero/Libs/DAO/BankData.java
  PZero.Libs.DAO.BankData
-Interfaces/IBusinessLogic.java
- Interfaces.IBusinessLogic
+Models/user.java
+ Models.user
 Exceptions/BadLogin.java
  Exceptions.BadLogin
-Models/account.java
- Models.account
+Interfaces/IBusinessLogic.java
+ Interfaces.IBusinessLogic
 PZero/Libs/DAO/Entities/accountEntity.java
  PZero.Libs.DAO.Entities.accountEntity
 Models/transaction.java
@@ -26,11 +26,11 @@ Exceptions/BusinessException.java
  Exceptions.BusinessException
 Models/pendingTransaction.java
  Models.pendingTransaction
-Models/user.java
- Models.user
-PZero/Main.java
- PZero.Main
+Models/account.java
+ Models.account
 PZero/Libs/BusinessLogic.java
  PZero.Libs.BusinessLogic
 PZero/Libs/UserFront.java
  PZero.Libs.UserFront
+Exceptions/InsufficientFunds.java
+ Exceptions.InsufficientFunds
