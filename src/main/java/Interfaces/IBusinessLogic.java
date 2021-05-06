@@ -16,7 +16,7 @@ public interface IBusinessLogic {
 
     ArrayList<transaction> getTransactionLog(String admin, String adminPassword) throws BadLogin, BusinessException;
 
-    ArrayList<pendingTransaction> getPendingTransactions(user id) throws BadLogin, BusinessException;
+    ArrayList<pendingTransaction> getPendingTransactions(user user) throws BadLogin, BusinessException;
 
     void approveTransaction(int id) throws InsufficientFunds, BusinessException;
 
@@ -40,9 +40,11 @@ public interface IBusinessLogic {
 
     boolean accountIdExists(int id) throws BusinessException;
 
-    void createTransaction(user loggedUser, account account, double amount, int id) throws BadLogin, BusinessException, InsufficientFunds;
+    void createTransaction(user loggedUser, int accountID, double amount, int id) throws BadLogin, BusinessException, InsufficientFunds;
 
     void cashDeposit(user loggedUser, int accountID, double amount) throws BadLogin, BusinessException, InsufficientFunds;
 
     void cashWithdrawal(user loggedUser, int accountID, double amount) throws BadLogin, InsufficientFunds, BusinessException;
+
+    ArrayList<transaction> transactionsFromAccount(user user, int accountID) throws BusinessException, BadLogin;
 }

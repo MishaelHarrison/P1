@@ -20,13 +20,8 @@ import java.util.Scanner;
 
 public class UserFront implements IUserFront {
 
-    //private static final Logger log=Logger.getLogger(UserFront.class);
+    private static final Logger log=Logger.getLogger(UserFront.class);
 
-    private user loggedUser;
-    private String userState = "none";
-    private String adminPassword = "";
-    private final String doubleRegex = "^(?:0|[1-9]\\d{0,2}(?:,?\\d{3})*)(?:\\.\\d+)?$";
-    private final String adminUsername = "admin";
     private final IBusinessLogic logic;
 
     private Javalin app;
@@ -41,6 +36,7 @@ public class UserFront implements IUserFront {
     @Override
     public void start() {
         //basic login
+        //(username, password)
         app.get("/user/*/*",ctx -> {
             user user = logic.login(ctx.splat(0), ctx.splat(1));
             if(user == null){
@@ -51,6 +47,7 @@ public class UserFront implements IUserFront {
         });
 
         //get all users accounts
+        //(username, password)
         app.get("/accounts/*/*",ctx -> {
             ArrayList<account> ret = null;
             try{
@@ -60,6 +57,80 @@ public class UserFront implements IUserFront {
                 ctx.status(400);
             }
             ctx.json(ret);
+        });
+
+        //transaction
+        //(username, password, accountID, amount, deposit/withdrawal/receivingAccountID)
+        app.post("/transactions/*/*/*/*/*",ctx -> {
+            ctx.status(500);
+            try{
+                if(Double.parseDouble(ctx.splat(3)) < 0){
+                    ctx.status(400);
+                    return;
+                }
+                user user = logic.login(ctx.splat(0), ctx.splat(1));
+                switch (ctx.splat(4)){
+                    case "deposit":
+                        logic.cashDeposit(user, Integer.parseInt(ctx.splat(2)), Double.parseDouble(ctx.splat(3)));
+                        break;
+                    case "withdrawal":
+                        logic.cashWithdrawal(user, Integer.parseInt(ctx.splat(2)), Double.parseDouble(ctx.splat(3)));
+                        break;
+                    default:
+                        logic.createTransaction(user, Integer.parseInt(ctx.splat(2)), Double.parseDouble(ctx.splat(3)), Integer.parseInt(ctx.splat(4)));
+                        break;
+                }
+                ctx.status(200);
+            }
+            catch (BadLogin e){
+                ctx.status(400);
+            } catch (InsufficientFunds e) {
+                ctx.status(400);
+            } catch (NumberFormatException e) {
+                ctx.status(400);
+            }
+        });
+
+        //add account
+        //(username, password, accountName, startingBalance)
+        app.post("/accounts/*/*/*/*",ctx -> {
+            try{
+                user user = logic.login(ctx.splat(0), ctx.splat(1));
+                logic.addAccount(user, ctx.splat(2), Double.parseDouble(ctx.splat(3)));
+            }
+            catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            }
+        });
+
+        //view users transactions
+        //(username, password, accountID)
+        app.get("/transactions/*/*/*",ctx -> {
+            try{
+                user user = logic.login(ctx.splat(0), ctx.splat(1));
+                ctx.json(logic.transactionsFromAccount(user, Integer.parseInt(ctx.splat(2))));
+            }
+            catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            }
+        });
+
+        //view users pending transactions
+        //(username, password)
+        app.get("/transactions/*/*",ctx -> {
+            try{
+                user user = logic.login(ctx.splat(0), ctx.splat(1));
+                ctx.json(logic.getPendingTransactions(user));
+            }
+            catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            }
         });
     }
 }

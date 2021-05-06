@@ -334,7 +334,7 @@ public class BankData implements IBankData {
         }
     }
 
-    private void transact(int id) throws BusinessException, InsufficientFunds {
+    private void transact(int id) throws BusinessException {
         Connection connection = postgresConnector.getConnection();
         String sql= transactionQuery()+"where m.id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
@@ -354,19 +354,15 @@ public class BankData implements IBankData {
         }
     }
 
-    private void subtractFunds(int issuingID, double amount) throws BusinessException, InsufficientFunds {
-        if (getAccount(issuingID).getBalance() >= amount){
-            Connection connection = postgresConnector.getConnection();
-            String sql="update "+schema+".accounts set balance = balance - ? where id = ?;";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-                preparedStatement.setDouble(1,amount);
-                preparedStatement.setInt(2, issuingID);
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                throw new BusinessException(e);
-            }
-        }else {
-            throw new InsufficientFunds();
+    private void subtractFunds(int issuingID, double amount) throws BusinessException {
+        Connection connection = postgresConnector.getConnection();
+        String sql="update "+schema+".accounts set balance = balance - ? where id = ?;";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setDouble(1,amount);
+            preparedStatement.setInt(2, issuingID);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new BusinessException(e);
         }
     }
 
@@ -409,6 +405,24 @@ public class BankData implements IBankData {
             ResultSet rs = preparedStatement.executeQuery();
 
             ret = transactionsFromRS(rs);
+        } catch (SQLException e) {
+            throw new BusinessException(e);
+        }
+        return ret;
+    }
+
+    @Override
+    public boolean validBalance(int accountID, double amount) throws BusinessException {
+        boolean ret = false;
+        Connection connection = postgresConnector.getConnection();
+        String sql="SELECT balance FROM "+schema+".accounts where id = ?;";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setInt(1,accountID);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()){
+                ret = rs.getDouble("balance") >= amount;
+            }
         } catch (SQLException e) {
             throw new BusinessException(e);
         }

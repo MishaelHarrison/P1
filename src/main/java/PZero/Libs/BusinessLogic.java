@@ -178,10 +178,11 @@ public class BusinessLogic implements IBusinessLogic {
     }
 
     @Override
-    public void createTransaction(user loggedUser, account account, double amount, int id) throws BadLogin, BusinessException, InsufficientFunds {
-        if(login(loggedUser.getUsername(), loggedUser.getPassword()).getId() == data.getAccount(account.getAccountID()).getUserID())
-            data.createTransaction(account.getAccountID(), id, amount, false);
-        else {throw new BadLogin();}
+    public void createTransaction(user loggedUser, int accountID, double amount, int id) throws BadLogin, BusinessException, InsufficientFunds {
+        if(login(loggedUser.getUsername(), loggedUser.getPassword()).getId() == data.getAccount(accountID).getUserID()) {
+            if (!data.validBalance(accountID, amount)) throw new InsufficientFunds();
+            data.createTransaction(accountID, id, amount, false);
+        }else {throw new BadLogin();}
     }
 
     @Override
@@ -193,8 +194,26 @@ public class BusinessLogic implements IBusinessLogic {
 
     @Override
     public void cashWithdrawal(user loggedUser, int accountID, double amount) throws BadLogin, InsufficientFunds, BusinessException {
-        if(login(loggedUser.getUsername(), loggedUser.getPassword()).getId() == data.getAccount(accountID).getUserID())
+        if(login(loggedUser.getUsername(), loggedUser.getPassword()).getId() == data.getAccount(accountID).getUserID()) {
+            if (!data.validBalance(accountID, amount)) throw new InsufficientFunds();
             data.createTransaction(accountID, null, amount, true);
-        else {throw new BadLogin();}
+        }else {throw new BadLogin();}
+    }
+
+    @Override
+    public ArrayList<transaction> transactionsFromAccount(user user, int accountID) throws BusinessException, BadLogin {
+        ArrayList<transaction> ret = new ArrayList<>();
+        if (login(user.getUsername(), user.getPassword()) != null){
+            ArrayList<transactionEntity> query = data.getTransactionsFromAccount(accountID);
+            for (transactionEntity i :query) {
+                ret.add(new transaction(
+                        i.getID(), i.getReceivingID(), i.getIssuingID(), i.getAmount(), i.getTimestamp(),
+                        i.getReceivingAccount().getUser().getUsername(), i.getIssuingAccount().getUser().getUsername()
+                ));
+            }
+        }else{
+            throw new BadLogin();
+        }
+        return ret;
     }
 }
