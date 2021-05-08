@@ -428,4 +428,35 @@ public class BankData implements IBankData {
         }
         return ret;
     }
+
+    @Override
+    public void deleteTransaction(int id) throws BusinessException {
+        Connection connection = postgresConnector.getConnection();
+        String sql="delete FROM "+schema+".transactions where id = ?;";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setInt(1,id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new BusinessException(e);
+        }
+    }
+
+    @Override
+    public int GetPendingCount(int id) throws BusinessException {
+        int ret = 0;
+        Connection connection = postgresConnector.getConnection();
+        String sql= transactionQuery()+"where (r.userid = ? and m.approved = false);";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setInt(1,id);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()){
+                ret++;
+                System.out.println("toast");
+            }
+            System.out.println(ret);
+        } catch (SQLException e) {
+            throw new BusinessException(e);
+        }
+        return ret;
+    }
 }

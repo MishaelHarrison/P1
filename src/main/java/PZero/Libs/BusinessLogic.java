@@ -37,7 +37,7 @@ public class BusinessLogic implements IBusinessLogic {
             ArrayList<transactionEntity> query = data.fullTransactionLog();
             for (transactionEntity i : query) {
                 ret.add(new transaction(
-                        i.getID(), i.getReceivingID(), i.getIssuingID(), i.getAmount(), i.getTimestamp(),
+                        i.getID(), i.getReceivingID(), i.getIssuingID(), i.getAmount(), i.getTimestamp().toString(),
                         i.getReceivingAccount() == null ? null : i.getReceivingAccount().getUser().getUsername(),
                         i.getIssuingAccount() == null ? null : i.getIssuingAccount().getUser().getUsername()
                 ));
@@ -110,7 +110,7 @@ public class BusinessLogic implements IBusinessLogic {
             ArrayList<transactionEntity> query = data.getTransactionsFromAccount(accountID);
             for (transactionEntity i :query) {
                 ret.add(new transaction(
-                        i.getID(), i.getReceivingID(), i.getIssuingID(), i.getAmount(), i.getTimestamp(),
+                        i.getID(), i.getReceivingID(), i.getIssuingID(), i.getAmount(), i.getTimestamp().toString(),
                         i.getReceivingAccount().getUser().getUsername(), i.getIssuingAccount().getUser().getUsername()
                 ));
             }
@@ -207,13 +207,19 @@ public class BusinessLogic implements IBusinessLogic {
             ArrayList<transactionEntity> query = data.getTransactionsFromAccount(accountID);
             for (transactionEntity i :query) {
                 ret.add(new transaction(
-                        i.getID(), i.getReceivingID(), i.getIssuingID(), i.getAmount(), i.getTimestamp(),
-                        i.getReceivingAccount().getUser().getUsername(), i.getIssuingAccount().getUser().getUsername()
+                        i.getID(), i.getReceivingID(), i.getIssuingID(), i.getAmount(), i.getTimestamp().toString(),
+                        i.getReceivingAccount() == null ? null : i.getReceivingAccount().getUser().getUsername(),
+                        i.getIssuingAccount() == null ? null : i.getIssuingAccount().getUser().getUsername()
                 ));
             }
         }else{
             throw new BadLogin();
         }
         return ret;
+    }
+
+    @Override
+    public void denyTransaction(int id) throws BusinessException {
+        data.deleteTransaction(id);
     }
 }

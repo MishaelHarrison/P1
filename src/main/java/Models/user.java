@@ -9,6 +9,7 @@ public class user {
     private String username;
     private String password;
     private boolean isEmployee;
+    private int pendingCount;
     private List<account> accounts;
     private List<pendingTransaction> pendingTransactions;
 
@@ -18,6 +19,15 @@ public class user {
         this.lname = lname;
         this.password = password;
         this.username = username;
+    }
+
+    public user(int id, String fname, String lname, String username, String password, int pendingCount) {
+        this.id = id;
+        this.fname = fname;
+        this.lname = lname;
+        this.password = password;
+        this.username = username;
+        this.pendingCount = pendingCount;
     }
 
     public int getId() {
@@ -66,5 +76,13 @@ public class user {
 
     public void setEmployee(boolean employee) {
         isEmployee = employee;
+    }
+
+    public int getPendingCount() {
+        return pendingCount;
+    }
+
+    public void setPendingCount(int pendingCount) {
+        this.pendingCount = pendingCount;
     }
 }

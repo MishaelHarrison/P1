@@ -36,4 +36,8 @@ public interface IBankData {
     ArrayList<transactionEntity> fullTransactionLog() throws BusinessException;
 
     boolean validBalance(int accountID, double amount) throws BusinessException;
+
+    void deleteTransaction(int id) throws BusinessException;
+
+    int GetPendingCount(int id) throws BusinessException;
 }

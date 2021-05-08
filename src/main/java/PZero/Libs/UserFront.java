@@ -10,6 +10,7 @@ import Models.pendingTransaction;
 import Models.transaction;
 import Models.user;
 import io.javalin.Javalin;
+import io.javalin.core.JavalinConfig;
 import org.apache.log4j.Logger;
 
 import java.io.InputStream;
@@ -24,25 +25,50 @@ public class UserFront implements IUserFront {
 
     private final IBusinessLogic logic;
 
-    private Javalin app;
+    private final Javalin app;
 
     public UserFront(IBusinessLogic logic){
-        app = Javalin.create(javalinConfig -> {
-            javalinConfig.enableCorsForAllOrigins();
-        }).start(8001);
+        app = Javalin.create(JavalinConfig::enableCorsForAllOrigins).start(8001);
         this.logic = logic;
     }
 
     @Override
     public void start() {
+        //establish connection is good
+        app.get("/yo_we_good",ctx -> {
+            ctx.json("yea we good");
+        });
+
         //basic login
         //(username, password)
         app.get("/user/*/*",ctx -> {
             user user = logic.login(ctx.splat(0), ctx.splat(1));
+            user.setPendingCount(logic.getPendingTransactions(user).size());
             if(user == null){
                 ctx.status(400);
             }else {
                 ctx.json(user);
+            }
+        });
+
+        //create user
+        //(username, password, fname, lname)
+        app.post("/user/*/*/*/*",ctx -> {
+            user user = new user( 0,
+                    ctx.splat(2),
+                    ctx.splat(3),
+                    ctx.splat(0),
+                    ctx.splat(1)
+            );
+            if(logic.isUsernameTaken(user.getUsername())){
+                ctx.status(400);
+                return;
+            }
+            try{
+                logic.addUser(user);
+                ctx.json(logic.login(user.getUsername(), user.getPassword()));
+            }catch (BusinessException e){
+                ctx.status(500);
             }
         });
 
@@ -55,6 +81,8 @@ public class UserFront implements IUserFront {
             }
             catch (BadLogin e){
                 ctx.status(400);
+            }catch (BusinessException e){
+                ctx.status(500);
             }
             ctx.json(ret);
         });
@@ -69,6 +97,7 @@ public class UserFront implements IUserFront {
                     return;
                 }
                 user user = logic.login(ctx.splat(0), ctx.splat(1));
+                if (user == null) throw new BadLogin();
                 switch (ctx.splat(4)){
                     case "deposit":
                         logic.cashDeposit(user, Integer.parseInt(ctx.splat(2)), Double.parseDouble(ctx.splat(3)));
@@ -88,6 +117,8 @@ public class UserFront implements IUserFront {
                 ctx.status(400);
             } catch (NumberFormatException e) {
                 ctx.status(400);
+            }catch (BusinessException e){
+                ctx.status(500);
             }
         });
 
@@ -96,12 +127,15 @@ public class UserFront implements IUserFront {
         app.post("/accounts/*/*/*/*",ctx -> {
             try{
                 user user = logic.login(ctx.splat(0), ctx.splat(1));
+                if (user == null) throw new BadLogin();
                 logic.addAccount(user, ctx.splat(2), Double.parseDouble(ctx.splat(3)));
             }
             catch (BadLogin e){
                 ctx.status(400);
             }catch (NumberFormatException e){
                 ctx.status(400);
+            }catch (BusinessException e){
+                ctx.status(500);
             }
         });
 
@@ -110,12 +144,15 @@ public class UserFront implements IUserFront {
         app.get("/transactions/*/*/*",ctx -> {
             try{
                 user user = logic.login(ctx.splat(0), ctx.splat(1));
+                if (user == null) throw new BadLogin();
                 ctx.json(logic.transactionsFromAccount(user, Integer.parseInt(ctx.splat(2))));
             }
             catch (BadLogin e){
                 ctx.status(400);
             }catch (NumberFormatException e){
                 ctx.status(400);
+            }catch (BusinessException e){
+                ctx.status(500);
             }
         });
 
@@ -124,12 +161,50 @@ public class UserFront implements IUserFront {
         app.get("/transactions/*/*",ctx -> {
             try{
                 user user = logic.login(ctx.splat(0), ctx.splat(1));
+                if (user == null) throw new BadLogin();
                 ctx.json(logic.getPendingTransactions(user));
             }
             catch (BadLogin e){
                 ctx.status(400);
             }catch (NumberFormatException e){
                 ctx.status(400);
+            }catch (BusinessException e){
+                ctx.status(500);
+            }
+        });
+
+        //accept transaction
+        //(username, password, transactionID)
+        app.put("/transactions/*/*/*",ctx -> {
+            try{
+                user user = logic.login(ctx.splat(0), ctx.splat(1));
+                if (user == null) throw new BadLogin();
+                logic.approveTransaction(Integer.parseInt(ctx.splat(2)));
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            }catch (InsufficientFunds insufficientFunds) {
+                ctx.status(400);
+            }catch (BusinessException e){
+                ctx.status(500);
+            }
+        });
+
+        //deny transaction
+        //(username, password, transactionID)
+        app.delete("/transactions/*/*/*",ctx -> {
+            try{
+                user user = logic.login(ctx.splat(0), ctx.splat(1));
+                if (user == null) throw new BadLogin();
+                logic.denyTransaction(Integer.parseInt(ctx.splat(2)));
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            } catch (BusinessException e){
+                ctx.status(500);
+                System.out.println(e.getCause());
             }
         });
     }

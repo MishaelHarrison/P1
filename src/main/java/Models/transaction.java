@@ -7,11 +7,11 @@ public class transaction implements Comparable {
     private Integer receivingAccountID;
     private Integer issuingAccountID;
     private double amount;
-    private Timestamp timestamp;
+    private String timestamp;
     private String receivingUsername;
     private String issuingUsername;
 
-    public transaction(int transactionID, Integer receivingAccountID, Integer issuingAccountID, double amount, Timestamp timestamp, String receivingUsername, String issuingUsername) {
+    public transaction(int transactionID, Integer receivingAccountID, Integer issuingAccountID, double amount, String timestamp, String receivingUsername, String issuingUsername) {
         this.transactionID = transactionID;
         this.receivingAccountID = receivingAccountID;
         this.issuingAccountID = issuingAccountID;
@@ -69,16 +69,29 @@ public class transaction implements Comparable {
         this.amount = amount;
     }
 
-    public Timestamp getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 
     @Override
     public int compareTo(Object o) {
         return timestamp.compareTo(((transaction)o).timestamp);
+    }
+
+    @Override
+    public String toString() {
+        return "transaction{" +
+                "transactionID=" + transactionID +
+                ", receivingAccountID=" + receivingAccountID +
+                ", issuingAccountID=" + issuingAccountID +
+                ", amount=" + amount +
+                ", timestamp=" + timestamp +
+                ", receivingUsername='" + receivingUsername + '\'' +
+                ", issuingUsername='" + issuingUsername + '\'' +
+                '}';
     }
 }

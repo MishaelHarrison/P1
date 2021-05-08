@@ -47,4 +47,6 @@ public interface IBusinessLogic {
     void cashWithdrawal(user loggedUser, int accountID, double amount) throws BadLogin, InsufficientFunds, BusinessException;
 
     ArrayList<transaction> transactionsFromAccount(user user, int accountID) throws BusinessException, BadLogin;
+
+    void denyTransaction(int id) throws BusinessException;
 }
