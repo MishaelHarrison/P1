@@ -227,7 +227,7 @@ public class BankData implements IBankData {
         ArrayList<userEntity> ret = new ArrayList<>();
         Connection connection = postgresConnector.getConnection();
         String sql="SELECT id, username, \"password\", fname, lname\n" +
-                "FROM "+schema+".users where username = ? and \"password\" = ?;";
+                "FROM "+schema+".users where username = ? and \"password\" = ? and not in (select id from p0.employees);";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, username);
             preparedStatement.setString(2, password);
@@ -302,7 +302,7 @@ public class BankData implements IBankData {
         ArrayList<userEntity> ret = new ArrayList<>();
         Connection connection = postgresConnector.getConnection();
         String sql="SELECT id, username, \"password\", fname, lname\n" +
-                "FROM "+schema+".users;";
+                "FROM "+schema+".users where id not in (select id from p0.employees);";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             ResultSet rs = preparedStatement.executeQuery();
 
@@ -366,12 +366,12 @@ public class BankData implements IBankData {
         }
     }
 
-    private void addFunds(int recievingID, double amount) throws BusinessException {
+    private void addFunds(int receivingID, double amount) throws BusinessException {
         Connection connection = postgresConnector.getConnection();
         String sql="update "+schema+".accounts set balance = balance + ? where id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setDouble(1,amount);
-            preparedStatement.setInt(2,recievingID);
+            preparedStatement.setInt(2,receivingID);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new BusinessException(e);
@@ -458,5 +458,91 @@ public class BankData implements IBankData {
             throw new BusinessException(e);
         }
         return ret;
+    }
+
+    @Override
+    public userEntity adminLogin(String adminUsername, String adminPassword) throws BusinessException {
+        ArrayList<userEntity> ret = new ArrayList<>();
+        Connection connection = postgresConnector.getConnection();
+        String sql="SELECT users.id as uid, username, \"password\", fname, lname\n" +
+                "FROM "+schema+".users where username = ? and \"password\" = ? and in (select id from p0.employees);";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setString(1, adminUsername);
+            preparedStatement.setString(2, adminPassword);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()){
+                ret.add(new userEntity(
+                        rs.getInt("uid"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("fname"),
+                        rs.getString("lname")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new BusinessException(e);
+        }
+        try{
+            return ret.get(0);
+        }catch (IndexOutOfBoundsException e){
+            return null;
+        }
+    }
+
+    @Override
+    public ArrayList<transactionEntity> fullTransactionLog(String filterMethod, String variable) throws BusinessException {
+        ArrayList<transactionEntity> ret;
+        Connection connection = postgresConnector.getConnection();
+        String sql = "";
+        switch (filterMethod){
+            case "transactionID":
+                sql = "id = " + Integer.parseInt(variable);
+                break;
+            case "type":
+                switch (variable){
+                    case "exchange":
+                        sql = "m.recievingid not null and m.issuingid not null";
+                        break;
+                    case "deposit":
+                        sql = "m.issuingid is null";
+                        break;
+                    case "withdrawal":
+                        sql = "m.recievingid is null";
+                        break;
+                    default:
+                        // todo bad input exception
+                        break;
+                }
+                break;
+            case "customerID":
+                return transactionsFromUser(Integer.parseInt(variable), true);
+            case "accountID":
+                return getTransactionsFromAccount(Integer.parseInt(variable));
+            default:
+                // todo bad input exception
+                break;
+        }
+        sql= transactionQuery()+"where approved = true and "+sql+';';
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            ResultSet rs = preparedStatement.executeQuery();
+
+            ret = transactionsFromRS(rs);
+        } catch (SQLException e) {
+            throw new BusinessException(e);
+        }
+        return ret;
+    }
+
+    @Override
+    public void denyAccount(int accountID) throws BusinessException {
+        Connection connection = postgresConnector.getConnection();
+        String sql="delete from "+schema+".accounts where id = ?;";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setInt(1,accountID);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new BusinessException(e);
+        }
     }
 }

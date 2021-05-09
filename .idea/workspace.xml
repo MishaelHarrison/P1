@@ -4,27 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d69b558-00a1-4f04-97c3-3b5011575595" name="Default Changelist" comment="added more http endpoints">
-      <change beforePath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.7/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/javaCompile/classAnalysis.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.7/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/javaCompile/javaCompile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
+    <list default="true" id="1d69b558-00a1-4f04-97c3-3b5011575595" name="Default Changelist" comment="finished customer-related user stories">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Models/employee.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HTML/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/HTML/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/Interfaces/IBankData.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/Interfaces/IBankData.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/Interfaces/IBusinessLogic.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/Interfaces/IBusinessLogic.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/BusinessLogic.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/BusinessLogic.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/DAO/BankData.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/DAO/BankData.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/UserFront.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/UserFront.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/source-classes-mapping.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/source-classes-mapping.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/Models/transaction.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/Models/transaction.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/Models/user.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/Models/user.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Interfaces/IBankData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interfaces/IBankData.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Interfaces/IBusinessLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interfaces/IBusinessLogic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Models/transaction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Models/transaction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Models/user.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Models/user.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/PZero/Libs/BusinessLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PZero/Libs/BusinessLogic.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/PZero/Libs/DAO/BankData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PZero/Libs/DAO/BankData.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/PZero/Libs/UserFront.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PZero/Libs/UserFront.java" afterDir="false" />
@@ -42,6 +29,13 @@
       <ProjectState />
     </projectState>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -57,7 +51,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../P0" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -177,7 +171,14 @@
       <option name="project" value="LOCAL" />
       <updated>1620278074159</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="finished customer-related user stories">
+      <created>1620450420669</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1620450420669</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -197,6 +198,7 @@
     <MESSAGE value="added Jenkinsfile" />
     <MESSAGE value="testing jenkins" />
     <MESSAGE value="added more http endpoints" />
-    <option name="LAST_COMMIT_MESSAGE" value="added more http endpoints" />
+    <MESSAGE value="finished customer-related user stories" />
+    <option name="LAST_COMMIT_MESSAGE" value="finished customer-related user stories" />
   </component>
 </project>

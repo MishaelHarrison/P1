@@ -40,4 +40,10 @@ public interface IBankData {
     void deleteTransaction(int id) throws BusinessException;
 
     int GetPendingCount(int id) throws BusinessException;
+
+    userEntity adminLogin(String adminUsername, String adminPassword) throws BusinessException;
+
+    ArrayList<transactionEntity> fullTransactionLog(String filterMethod, String variable) throws BusinessException;
+
+    void denyAccount(int accountID) throws BusinessException;
 }

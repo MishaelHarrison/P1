@@ -5,10 +5,7 @@ import Exceptions.BusinessException;
 import Exceptions.InsufficientFunds;
 import Interfaces.IBankData;
 import Interfaces.IBusinessLogic;
-import Models.account;
-import Models.pendingTransaction;
-import Models.transaction;
-import Models.user;
+import Models.*;
 import PZero.Libs.DAO.Entities.accountEntity;
 import PZero.Libs.DAO.Entities.transactionEntity;
 import PZero.Libs.DAO.Entities.userEntity;
@@ -17,8 +14,6 @@ import java.util.ArrayList;
 
 public class BusinessLogic implements IBusinessLogic {
 
-    private final String adminUsername = "admin";
-    private final String adminPassword = "apache";
     private IBankData data;
 
     public BusinessLogic(IBankData data) {
@@ -26,14 +21,18 @@ public class BusinessLogic implements IBusinessLogic {
     }
 
     @Override
-    public boolean adminLogin(String adminUsername, String adminPassword) {
-        return adminUsername.equals(this.adminUsername) && adminPassword.equals(this.adminPassword);
+    public employee adminLogin(String adminUsername, String adminPassword) throws BusinessException {
+        userEntity user = data.adminLogin(adminUsername, adminPassword);
+        if(user == null) return null;
+        else return new employee(
+                user.getID(), user.getFname(), user.getLname(), user.getUsername(), user.getPassword()
+        );
     }
 
     @Override
     public ArrayList<transaction> getTransactionLog(String admin, String adminPassword) throws BadLogin, BusinessException {
         ArrayList<transaction> ret = new ArrayList<>();
-        if (adminLogin(admin, adminPassword)){
+        if (adminLogin(admin, adminPassword)!= null){
             ArrayList<transactionEntity> query = data.fullTransactionLog();
             for (transactionEntity i : query) {
                 ret.add(new transaction(
@@ -74,7 +73,7 @@ public class BusinessLogic implements IBusinessLogic {
     @Override
     public ArrayList<user> getAllUsers(String admin, String adminPassword) throws BadLogin, BusinessException {
         ArrayList<user> ret = new ArrayList<>();
-        if (adminLogin(admin, adminPassword)){
+        if (adminLogin(admin, adminPassword)!= null){
             ArrayList<userEntity> query = data.getAllUsers();
             for (userEntity i :query) {
                 ret.add(new user(
@@ -90,7 +89,7 @@ public class BusinessLogic implements IBusinessLogic {
     @Override
     public ArrayList<account> getUserAccounts(String admin, String adminPassword, int userID) throws BadLogin, BusinessException {
         ArrayList<account> ret = new ArrayList<>();
-        if (adminLogin(admin, adminPassword)){
+        if (adminLogin(admin, adminPassword)!= null){
             ArrayList<accountEntity> query = data.getAccountsFromUser(userID);
             for (accountEntity i :query) {
                 ret.add(new account(
@@ -106,7 +105,7 @@ public class BusinessLogic implements IBusinessLogic {
     @Override
     public ArrayList<transaction> getTransactionHistory(String admin, String adminPassword, int accountID) throws BadLogin, BusinessException {
         ArrayList<transaction> ret = new ArrayList<>();
-        if (adminLogin(admin, adminPassword)){
+        if (adminLogin(admin, adminPassword) != null){
             ArrayList<transactionEntity> query = data.getTransactionsFromAccount(accountID);
             for (transactionEntity i :query) {
                 ret.add(new transaction(
@@ -122,7 +121,7 @@ public class BusinessLogic implements IBusinessLogic {
 
     @Override
     public void approveAccount(String admin, String adminPassword, int accountID) throws BadLogin, BusinessException {
-        if (adminLogin(admin, adminPassword)) data.approveAccount(accountID);
+        if (adminLogin(admin, adminPassword) != null) data.approveAccount(accountID);
         else {throw new BadLogin();}
     }
 
@@ -221,5 +220,29 @@ public class BusinessLogic implements IBusinessLogic {
     @Override
     public void denyTransaction(int id) throws BusinessException {
         data.deleteTransaction(id);
+    }
+
+    @Override
+    public ArrayList<transaction> getTransactionLog(String username, String password, String filterMethod, String variable) throws BusinessException, BadLogin {
+        ArrayList<transaction> ret = new ArrayList<>();
+        if (adminLogin(username, password)!= null){
+            ArrayList<transactionEntity> query = data.fullTransactionLog(filterMethod, variable);
+            for (transactionEntity i : query) {
+                ret.add(new transaction(
+                        i.getID(), i.getReceivingID(), i.getIssuingID(), i.getAmount(), i.getTimestamp().toString(),
+                        i.getReceivingAccount() == null ? null : i.getReceivingAccount().getUser().getUsername(),
+                        i.getIssuingAccount() == null ? null : i.getIssuingAccount().getUser().getUsername()
+                ));
+            }
+        }else {
+            throw new BadLogin();
+        }
+        return ret;
+    }
+
+    @Override
+    public void denyAccount(String username, String password, int accountID) throws BadLogin, BusinessException {
+        if (adminLogin(username, password) != null) data.denyAccount(accountID);
+        else {throw new BadLogin();}
     }
 }

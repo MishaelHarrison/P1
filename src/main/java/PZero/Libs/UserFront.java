@@ -5,10 +5,7 @@ import Exceptions.BusinessException;
 import Exceptions.InsufficientFunds;
 import Interfaces.IBusinessLogic;
 import Interfaces.IUserFront;
-import Models.account;
-import Models.pendingTransaction;
-import Models.transaction;
-import Models.user;
+import Models.*;
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
 import org.apache.log4j.Logger;
@@ -204,7 +201,110 @@ public class UserFront implements IUserFront {
                 ctx.status(400);
             } catch (BusinessException e){
                 ctx.status(500);
-                System.out.println(e.getCause());
+            }
+        });
+
+        //admin login
+        //(username, password)
+        app.get("/admin/*/*",ctx -> {
+            try{
+                employee admin = logic.adminLogin(ctx.splat(0), ctx.splat(1));
+                if (admin == null) throw new BadLogin();
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            } catch (BusinessException e){
+                ctx.status(500);
+            }
+        });
+
+        //full transaction history
+        //(username, password)
+        app.get("/admin/transactions/*/*",ctx -> {
+            try{
+                ArrayList<transaction> log = logic.getTransactionLog(ctx.splat(0), ctx.splat(1));
+                ctx.json(log);
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            } catch (BusinessException e){
+                ctx.status(500);
+            }
+        });
+
+        //full transaction history filtered
+        //(username, password, filterMethod, variable)
+        app.get("/admin/transactions/*/*/*/*",ctx -> {
+            try{
+                ArrayList<transaction> log = logic.getTransactionLog(ctx.splat(0), ctx.splat(1),
+                        ctx.splat(2), ctx.splat(3));
+                ctx.json(log);
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            } catch (BusinessException e){
+                ctx.status(500);
+            }
+        });
+
+        //view all users
+        //(username, password)
+        app.get("/admin/users/*/*",ctx -> {
+            try{
+                ArrayList<user> log = logic.getAllUsers(ctx.splat(0), ctx.splat(1));
+                ctx.json(log);
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            } catch (BusinessException e){
+                ctx.status(500);
+            }
+        });
+
+        //view accounts from user
+        //(username, password, userID)
+        app.get("/admin/accounts/*/*/*",ctx -> {
+            try{
+                ArrayList<account> log = logic.getUserAccounts(ctx.splat(0), ctx.splat(1), Integer.parseInt(ctx.splat(2)));
+                ctx.json(log);
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            } catch (BusinessException e){
+                ctx.status(500);
+            }
+        });
+
+        //approve account
+        //(username, password, accountID)
+        app.post("/admin/accounts/*/*/*",ctx -> {
+            try{
+                logic.approveAccount(ctx.splat(0), ctx.splat(1), Integer.parseInt(ctx.splat(2)));
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            } catch (BusinessException e){
+                ctx.status(500);
+            }
+        });
+
+        //deny account
+        //(username, password, accountID)
+        app.delete("/admin/accounts/*/*/*",ctx -> {
+            try{
+                logic.denyAccount(ctx.splat(0), ctx.splat(1), Integer.parseInt(ctx.splat(2)));
+            }catch (BadLogin e){
+                ctx.status(400);
+            }catch (NumberFormatException e){
+                ctx.status(400);
+            } catch (BusinessException e){
+                ctx.status(500);
             }
         });
     }

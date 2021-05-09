@@ -267,7 +267,8 @@ function cash(isDeposit, id, bal, type) {
     event.preventDefault();
     const formData = new FormData(this);
     if (isDeposit || formData.get("ammount") <= bal) {
-      apiCash(user.username, user.password, formData.get("ammount"), isDeposit, id, x => reset());
+      apiCash(user.username, user.password, formData.get("ammount"), isDeposit, id);
+      reset();
     } else {
       document.getElementById("errorNotification").innerText =
         "enter an ammount within your balance";
@@ -282,7 +283,8 @@ function exchange(id, bal, type) {
     event.preventDefault();
     const formData = new FormData(this);
     if (formData.get("ammount") <= bal) {
-      apiExchange(user.username, user.password, formData.get("ammount"), id, formData.get("id"), x => reset());
+      apiExchange(user.username, user.password, formData.get("ammount"), id, formData.get("id"));
+      reset();
     } else {
       document.getElementById("errorNotification").innerText =
         "enter an ammount within your balance";
@@ -404,12 +406,12 @@ function apiUserPending(username, password, call) {
     .then((x) => call(x));
 }
 
-function apiAcceptTransaction(username, password, id, call) {
+function apiAcceptTransaction(username, password, id) {
   fetch(APIUrl + `transactions/${username}/${password}/${id}`,
     { method: "PUT" });
 }
 
-function apiDenyTransaction(username, password, id, call) {
+function apiDenyTransaction(username, password, id) {
   fetch(APIUrl + `transactions/${username}/${password}/${id}`,
     { method: "DELETE" });
 }

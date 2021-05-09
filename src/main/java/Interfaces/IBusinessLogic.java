@@ -3,16 +3,13 @@ package Interfaces;
 import Exceptions.BadLogin;
 import Exceptions.BusinessException;
 import Exceptions.InsufficientFunds;
-import Models.account;
-import Models.pendingTransaction;
-import Models.transaction;
-import Models.user;
+import Models.*;
 
 import java.util.ArrayList;
 
 public interface IBusinessLogic {
 
-    boolean adminLogin(String adminUsername, String adminPassword);
+    employee adminLogin(String adminUsername, String adminPassword) throws BusinessException;
 
     ArrayList<transaction> getTransactionLog(String admin, String adminPassword) throws BadLogin, BusinessException;
 
@@ -49,4 +46,8 @@ public interface IBusinessLogic {
     ArrayList<transaction> transactionsFromAccount(user user, int accountID) throws BusinessException, BadLogin;
 
     void denyTransaction(int id) throws BusinessException;
+
+    ArrayList<transaction> getTransactionLog(String username, String password, String filterMethod, String variable) throws BusinessException, BadLogin;
+
+    void denyAccount(String username, String password, int accountID) throws BadLogin, BusinessException;
 }
