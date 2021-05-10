@@ -6,6 +6,7 @@ import Exceptions.InsufficientFunds;
 import Interfaces.IBusinessLogic;
 import Interfaces.IUserFront;
 import Models.*;
+import PZero.Libs.DAO.seedData;
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
 import org.apache.log4j.Logger;
@@ -31,6 +32,8 @@ public class UserFront implements IUserFront {
 
     @Override
     public void start() {
+        app.before(ctx -> System.out.println(ctx.url()));
+
         //establish connection is good
         app.get("/yo_we_good",ctx -> {
             ctx.json("yea we good");
@@ -40,10 +43,10 @@ public class UserFront implements IUserFront {
         //(username, password)
         app.get("/user/*/*",ctx -> {
             user user = logic.login(ctx.splat(0), ctx.splat(1));
-            user.setPendingCount(logic.getPendingTransactions(user).size());
             if(user == null){
                 ctx.status(400);
             }else {
+                user.setPendingCount(logic.getPendingTransactions(user).size());
                 ctx.json(user);
             }
         });
@@ -75,13 +78,13 @@ public class UserFront implements IUserFront {
             ArrayList<account> ret = null;
             try{
                 ret = logic.getUserAccounts(logic.login(ctx.splat(0), ctx.splat(1)));
+                ctx.json(ret);
             }
             catch (BadLogin e){
                 ctx.status(400);
             }catch (BusinessException e){
                 ctx.status(500);
             }
-            ctx.json(ret);
         });
 
         //transaction
@@ -206,10 +209,11 @@ public class UserFront implements IUserFront {
 
         //admin login
         //(username, password)
-        app.get("/admin/*/*",ctx -> {
+        app.get("/admin/login/*/*",ctx -> {
             try{
                 employee admin = logic.adminLogin(ctx.splat(0), ctx.splat(1));
                 if (admin == null) throw new BadLogin();
+                ctx.json(admin);
             }catch (BadLogin e){
                 ctx.status(400);
             }catch (NumberFormatException e){
@@ -231,12 +235,14 @@ public class UserFront implements IUserFront {
                 ctx.status(400);
             } catch (BusinessException e){
                 ctx.status(500);
+            } catch (Throwable e){
+                System.out.println(e.getMessage());
             }
         });
 
         //full transaction history filtered
         //(username, password, filterMethod, variable)
-        app.get("/admin/transactions/*/*/*/*",ctx -> {
+        app.get("/admin/transactionsFiltered/*/*/*/*",ctx -> {
             try{
                 ArrayList<transaction> log = logic.getTransactionLog(ctx.splat(0), ctx.splat(1),
                         ctx.splat(2), ctx.splat(3));
@@ -246,7 +252,10 @@ public class UserFront implements IUserFront {
             }catch (NumberFormatException e){
                 ctx.status(400);
             } catch (BusinessException e){
+                System.out.println(e.getCause());
                 ctx.status(500);
+            } catch (Throwable e){
+                System.out.println(e.getMessage());
             }
         });
 
@@ -282,7 +291,7 @@ public class UserFront implements IUserFront {
 
         //approve account
         //(username, password, accountID)
-        app.post("/admin/accounts/*/*/*",ctx -> {
+        app.put("/admin/accounts/*/*/*",ctx -> {
             try{
                 logic.approveAccount(ctx.splat(0), ctx.splat(1), Integer.parseInt(ctx.splat(2)));
             }catch (BadLogin e){
@@ -306,6 +315,11 @@ public class UserFront implements IUserFront {
             } catch (BusinessException e){
                 ctx.status(500);
             }
+        });
+
+        //seed the database
+        app.post("/seed",ctx -> {
+            seedData.reset();
         });
     }
 }

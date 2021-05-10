@@ -8,6 +8,7 @@ public class accountEntity {
     private String name;
 
     private userEntity user;
+    private userEntity aprover;
 
     public accountEntity(int ID, int userID, double balance, boolean approved, String name) {
         this.ID = ID;
@@ -63,5 +64,13 @@ public class accountEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public userEntity getAprover() {
+        return aprover;
+    }
+
+    public void setAprover(userEntity aprover) {
+        this.aprover = aprover;
     }
 }

@@ -77,7 +77,7 @@ public class BusinessLogic implements IBusinessLogic {
             ArrayList<userEntity> query = data.getAllUsers();
             for (userEntity i :query) {
                 ret.add(new user(
-                        i.getID(), i.getFname(), i.getLname(), i.getUsername(),""
+                        i.getID(), i.getFname(), i.getLname(), i.getUsername(),i.getPassword()
                 ));
             }
         }else {
@@ -93,7 +93,9 @@ public class BusinessLogic implements IBusinessLogic {
             ArrayList<accountEntity> query = data.getAccountsFromUser(userID);
             for (accountEntity i :query) {
                 ret.add(new account(
-                        i.getID(), i.getName(), i.getBalance(), i.isApproved(), i.getUser().getFname(), i.getUser().getLname()
+                        i.getID(), i.getName(), i.getBalance(), i.isApproved(), i.getUser().getFname(), i.getUser().getLname(),
+                        i.getAprover()==null?"":i.getAprover().getFname(),
+                        i.getAprover()==null?"":i.getAprover().getLname()
                 ));
             }
         }else{
@@ -121,7 +123,8 @@ public class BusinessLogic implements IBusinessLogic {
 
     @Override
     public void approveAccount(String admin, String adminPassword, int accountID) throws BadLogin, BusinessException {
-        if (adminLogin(admin, adminPassword) != null) data.approveAccount(accountID);
+        employee employee = adminLogin(admin, adminPassword);
+        if (employee != null) data.approveAccount(accountID, employee.getEmployeeID());
         else {throw new BadLogin();}
     }
 
@@ -162,7 +165,9 @@ public class BusinessLogic implements IBusinessLogic {
             ArrayList<accountEntity> query = data.getAccountsFromUser(loggedUser.getId());
             for (accountEntity i :query) {
                 ret.add(new account(
-                        i.getID(), i.getName(), i.getBalance(), i.isApproved(), i.getUser().getFname(), i.getUser().getLname()
+                        i.getID(), i.getName(), i.getBalance(), i.isApproved(), i.getUser().getFname(), i.getUser().getLname(),
+                        i.getAprover()==null?"":i.getAprover().getFname(),
+                        i.getAprover()==null?"":i.getAprover().getLname()
                 ));
             }
         }else {

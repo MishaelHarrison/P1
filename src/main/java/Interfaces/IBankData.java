@@ -23,7 +23,7 @@ public interface IBankData {
 
     void addAccount(int userID, String name, double amount) throws BusinessException;
 
-    void approveAccount(int accountID) throws BusinessException;
+    void approveAccount(int accountID, int employeeID) throws BusinessException;
 
     ArrayList<transactionEntity> getTransactionsFromAccount(int accountID) throws BusinessException;
 

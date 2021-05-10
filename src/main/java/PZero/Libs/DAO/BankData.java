@@ -114,7 +114,7 @@ public class BankData implements IBankData {
     public accountEntity getAccount(int accountID) throws BusinessException {
         ArrayList<accountEntity> ret = new ArrayList<>();
         Connection connection = postgresConnector.getConnection();
-        String sql="select a.id, a.balance, a.accountType, a.approved, b.id as userid, b.fname, b.lname, b.username from " +
+        String sql="select a.id, a.balance, a.accountType, a.approved, b.id as userid, activatorid from " +
                 schema+".accounts as a inner join "+schema+".users as b on b.id = a.userid where a.id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setInt(1, accountID);
@@ -128,13 +128,8 @@ public class BankData implements IBankData {
                         rs.getBoolean("approved"),
                         rs.getString("accountType")
                 );
-                i.setUser(new userEntity(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        "password left intentionally hidden",
-                        rs.getString("fname"),
-                        rs.getString("lname")
-                ));
+                i.setUser(getUser(rs.getInt("userid")));
+                i.setAprover(getUser(rs.getInt("activatorid")));
                 ret.add(i);
             }
         } catch (SQLException e) {
@@ -151,7 +146,7 @@ public class BankData implements IBankData {
     public ArrayList<accountEntity> getAccountsFromUser(int id) throws BusinessException {
         ArrayList<accountEntity> ret = new ArrayList<>();
         Connection connection = postgresConnector.getConnection();
-        String sql="select a.id, a.balance, a.accountType, a.approved, b.id as userid, b.fname, b.lname, b.username from " +
+        String sql="select a.id, a.balance, a.accountType, a.approved, b.id as userid, activatorid from " +
                 schema+".accounts as a inner join "+schema+".users as b on a.userid = b.id where b.id = ?; ";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setInt(1, id);
@@ -165,13 +160,8 @@ public class BankData implements IBankData {
                         rs.getBoolean("approved"),
                         rs.getString("accountType")
                 );
-                i.setUser(new userEntity(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        "password left intentionally hidden",
-                        rs.getString("fname"),
-                        rs.getString("lname")
-                ));
+                i.setUser(getUser(rs.getInt("userid")));
+                i.setAprover(getUser(rs.getInt("activatorid")));
                 ret.add(i);
             }
         } catch (SQLException e) {
@@ -227,10 +217,38 @@ public class BankData implements IBankData {
         ArrayList<userEntity> ret = new ArrayList<>();
         Connection connection = postgresConnector.getConnection();
         String sql="SELECT id, username, \"password\", fname, lname\n" +
-                "FROM "+schema+".users where username = ? and \"password\" = ? and not in (select id from p0.employees);";
+                "FROM "+schema+".users where username = ? and \"password\" = ? and id not in (select id from p0.employees);";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, username);
             preparedStatement.setString(2, password);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()){
+                ret.add(new userEntity(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("fname"),
+                        rs.getString("lname")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new BusinessException(e);
+        }
+        try{
+            return ret.get(0);
+        }catch (IndexOutOfBoundsException e){
+            return null;
+        }
+    }
+
+    private userEntity getUser(int id) throws BusinessException {
+        ArrayList<userEntity> ret = new ArrayList<>();
+        Connection connection = postgresConnector.getConnection();
+        String sql="SELECT id, username, \"password\", fname, lname\n" +
+                "FROM "+schema+".users where id = ?;";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setInt(1, id);
             ResultSet rs = preparedStatement.executeQuery();
 
             while (rs.next()){
@@ -269,11 +287,12 @@ public class BankData implements IBankData {
     }
 
     @Override
-    public void approveAccount(int accountID) throws BusinessException {
+    public void approveAccount(int accountID, int employeeID) throws BusinessException {
         Connection connection = postgresConnector.getConnection();
-        String sql="update "+schema+".accounts set approved = true where id = ?;";
+        String sql="update "+schema+".accounts set approved = true, activatorid = ? where id = ?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setInt(1,accountID);
+            preparedStatement.setInt(1,employeeID);
+            preparedStatement.setInt(2,accountID);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new BusinessException(e);
@@ -465,7 +484,7 @@ public class BankData implements IBankData {
         ArrayList<userEntity> ret = new ArrayList<>();
         Connection connection = postgresConnector.getConnection();
         String sql="SELECT users.id as uid, username, \"password\", fname, lname\n" +
-                "FROM "+schema+".users where username = ? and \"password\" = ? and in (select id from p0.employees);";
+                "FROM "+schema+".users where username = ? and \"password\" = ? and id in (select id from p0.employees);";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, adminUsername);
             preparedStatement.setString(2, adminPassword);
@@ -497,12 +516,12 @@ public class BankData implements IBankData {
         String sql = "";
         switch (filterMethod){
             case "transactionID":
-                sql = "id = " + Integer.parseInt(variable);
+                sql = "m.id = " + Integer.parseInt(variable);
                 break;
             case "type":
                 switch (variable){
                     case "exchange":
-                        sql = "m.recievingid not null and m.issuingid not null";
+                        sql = "m.recievingid is not null and m.issuingid is not null";
                         break;
                     case "deposit":
                         sql = "m.issuingid is null";

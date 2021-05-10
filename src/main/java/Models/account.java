@@ -7,14 +7,18 @@ public class account {
     private boolean approved;
     private String userFname;
     private String userLname;
+    private String approvedFname;
+    private String approvedLname;
 
-    public account(int accountID, String accountType, double balance, boolean approved, String userFname, String userLname) {
+    public account(int accountID, String accountType, double balance, boolean approved, String userFname, String userLname, String approvedFname, String approvedLname) {
         this.accountID = accountID;
         this.accountType = accountType;
         this.balance = balance;
         this.approved = approved;
         this.userFname = userFname;
         this.userLname = userLname;
+        this.approvedFname = approvedFname;
+        this.approvedLname = approvedLname;
     }
 
     public int getAccountID() {
@@ -63,5 +67,21 @@ public class account {
 
     public void setUserLname(String userLname) {
         this.userLname = userLname;
+    }
+
+    public String getApprovedFname() {
+        return approvedFname;
+    }
+
+    public void setApprovedFname(String approvedFname) {
+        this.approvedFname = approvedFname;
+    }
+
+    public String getApprovedLname() {
+        return approvedLname;
+    }
+
+    public void setApprovedLname(String approvedLname) {
+        this.approvedLname = approvedLname;
     }
 }

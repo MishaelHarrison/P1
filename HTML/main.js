@@ -1,5 +1,6 @@
 let user;
 let APIUrl = "http://localhost:8001/";
+let admin;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///HTML generators//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,6 +108,13 @@ function exchangeHTML(acctType, bal) {
   <span id="errorNotification"  style="color:red;"></span><br>`;
 }
 
+function userDisplayHTTP(user) {
+  return `
+  id: ${user.id}<br>
+  username: ${user.username}<br>
+  name: ${user.fname}, ${user.lname}`;
+}
+
 function createCard(content) {
   return `
   <div class="card" style="margin-bottom: 10px;">
@@ -130,16 +138,81 @@ function accountDisplay(element) {
     `</div>`;
 }
 
+function adminAccountDisplay(element) {
+  return `
+  <div class="col-2" id='account${element.accountID}'>` +
+    createCard(
+      "account id: " + element.accountID +
+      "<br>account type: " + element.accountType +
+      "<br>" + (element.approved ? "" : "Starting ") + "balance: " + element.balance +
+      (!element.approved ?
+        `<br><br><button type="button" class="btn btn-success" onclick="aproveAccount(${element.accountID})"">Aprove account</button>
+        <br><br><button type="button" class="btn btn-danger" onclick="denyAccount(${element.accountID})">Deny account</button>`
+        : `<br>Aproved by: ${element.approvedFname}, ${element.approvedLname}`)) +
+    `</div>`;
+}
+
+function adminDisplayTransaction(t) {
+  return `
+  <div class="col-2">` +
+    createCard(`
+    transactionID: ${t.transactionID}<br>
+    amount: ${t.amount}<br>
+    time: ${t.timestamp}<br><br>
+    ${t.receivingAccountID && t.issuingAccountID ?
+        `Exchange<br>
+      receiving account ID: ${t.receivingAccountID}<br>
+      receiving username: ${t.receivingUsername}<br>
+      issuing account ID: ${t.issuingAccountID}<br>
+      issuing username: ${t.issuingUsername}` :
+        t.receivingAccountID ?
+          `Deposit<br>
+          account ID: ${t.receivingAccountID}<br>
+      username: ${t.receivingUsername}` :
+          `Withdrawal<br>
+          account ID: ${t.issuingAccountID}<br>
+      username: ${t.issuingUsername}`}`)
+    + `</div>`;
+}
+
 function displayTransaction(t) {
   return `
   id: ${t.transactionID}<br>
   time: ${t.timestamp}<br>
-  ${!t.receivingAccountID || !t.issuingAccountID ?
-      !t.issuingAccountID ?
-        "Deposit<br>"
-        : "Withdrawl<br>"
-      : `Issueing user: ${t.issuingUsername}<br>`}
+  ${t.receivingAccountID && t.issuingAccountID ?
+      `Issueing user: ${t.issuingUsername}<br>`
+      : t.issuingAccountID ?
+        "Withdrawl<br>"
+        : "Deposit<br>"}
   amount: ${t.amount}`;
+}
+
+function filterStageOneHTML() {
+  return `Select filter method:<br><br>
+  <button type="button" class="btn btn-primary" id="transactionID">Transaction ID</button><br><br>
+  <button type="button" class="btn btn-primary" id="type">Transaction type</button><br><br>
+  <button type="button" class="btn btn-primary" id="customerID">Customer ID</button><br><br>
+  <button type="button" class="btn btn-primary" id="accountID">Account ID</button>`;
+}
+
+function IDform() {
+  return `
+  Enter ID to filter by:<br>
+  <form>
+  <div class="formItem">
+    <input type="number" step="1" min="0" name="id" id="id" required>
+  </div>
+  <div class="formItem">
+    <input type="submit" value="Complete">
+  </div>
+  </form>`;
+}
+
+function transactionTypeMenu() {
+  return `
+  <button type="button" class="btn btn-primary" id="exchange">Exchange</button><br><br>
+  <button type="button" class="btn btn-primary" id="deposit">Deposit</button><br><br>
+  <button type="button" class="btn btn-primary" id="withdrawal">Withdrawal</button><br><br>`;
 }
 
 function displayPendingTransaction(t) {
@@ -147,7 +220,7 @@ function displayPendingTransaction(t) {
   account: ${t.acceptingAccountName}<br>
   issuer: ${t.issuingFname}, ${t.issuingLname}<br>
   amount: ${t.amount}<br><br>
-  <button type="button" class="btn btn-warning" onclick="acceptTransaction(${t.pendingTransactionID})">Accept Transaction</button>
+  <button type="button" class="btn btn-success" onclick="acceptTransaction(${t.pendingTransactionID})">Accept Transaction</button>
   <button type="button" class="btn btn-danger" onclick="denyTransaction(${t.pendingTransactionID})">Deny Transaction</button>`;
 }
 
@@ -159,6 +232,14 @@ function transactMenu(account) {
   `;
 }
 
+function adminMenuHTML() {
+  return `
+  <button type="button" class="btn btn-primary" onclick="userList()">View all users</button><br><br>
+  <button type="button" class="btn btn-primary" onclick="transactionsLog()">Transactions log</button><br><br>
+  <button type="button" class="btn btn-primary" onclick="getFilteredTransactionsLog()">Transactions log filtered</button>
+  `;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///main injectors//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,11 +247,19 @@ function transactMenu(account) {
 function reset() {
   apiCheckIn(() => {
     if (user) {
-      document.getElementById("InjectableBody").innerHTML = "";
-      document.getElementById("greetings").innerText =
-        " " + user.fname + " " + user.lname;
-      listUsersAccounts();
-      document.getElementById("logoutButton").innerHTML = `<button type="button" class="btn btn-primary" onclick="logout()">logout</button>`;
+      if (!admin) {
+        document.getElementById("InjectableBody").innerHTML = "";
+        document.getElementById("greetings").innerText =
+          " " + user.fname + " " + user.lname;
+        listUsersAccounts();
+        document.getElementById("logoutButton").innerHTML = `<button type="button" class="btn btn-primary" onclick="logout()">logout</button>`;
+      } else {
+        document.getElementById("InjectableBody").innerHTML = "";
+        document.getElementById("greetings").innerText =
+          " employee " + user.fname + " " + user.lname;
+        document.getElementById("logoutButton").innerHTML = `<button type="button" class="btn btn-primary" onclick="logout()">logout</button>`;
+        document.getElementById("InjectableBody").innerHTML = adminMenuHTML()
+      }
     } else {
       document.getElementById("greetings").innerText = "";
       document.getElementById("logoutButton").innerHTML = "";
@@ -330,11 +419,133 @@ function newUser() {
 }
 
 function adminLogin() {
+  document.getElementById("InjectableBody").innerHTML = loginHTML();
   document.getElementById("adminLoginLabel").innerText = "Admin login";
+
+  document.forms[0].addEventListener("submit", function (event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    apiAdminLogin(formData.get("username"), formData.get("password"), (x) => {
+      if (x) {
+        user = x;
+        admin = true;
+        reset();
+      } else {
+        document.getElementById("errorNotification").innerText =
+          "username/password not found, try again";
+      }
+    });
+  });
+}
+
+function userList() {
+  let printer = document.getElementById("InjectableBody");
+  printer.innerHTML = "";
+
+  apiAdminListUsers(user.username, user.password, x => {
+    if (x) {
+      x.forEach(i => {
+        printer.innerHTML += `
+        <div class="col-2">
+          ${createCard(`
+          ${userDisplayHTTP(i)}
+          <br><br><button type="button" class="btn btn-primary" onclick="adminUserAccounts(${i.id})">View accounts</button>`)}
+        </div>`
+      });
+      printer.innerHTML = `<div class="row">${printer.innerHTML}</div>`;
+    } else reset();
+  });
+}
+
+function adminUserAccounts(id) {
+  let printer = document.getElementById("InjectableBody");
+  printer.innerHTML = "";
+
+  apiAdminListUserAccounts(user.username, user.password, id, x => {
+    if (x) {
+      x.forEach(i => {
+        if (!i.approved) printer.innerHTML += adminAccountDisplay(i);
+      });
+      x.forEach(i => {
+        if (i.approved) printer.innerHTML += adminAccountDisplay(i);
+      });
+      printer.innerHTML = `<div class="row">${printer.innerHTML}</div>`;
+    } else reset();
+  });
+}
+
+function aproveAccount(id) {
+  apiAcceptAccount(user.username, user.password, id);
+  document.getElementById(`account${id}`).remove();
+}
+
+function denyAccount(id) {
+  apiDenyAccount(user.username, user.password, id);
+  document.getElementById(`account${id}`).remove();
+}
+
+function transactionsLog() {
+  let printer = document.getElementById("InjectableBody");
+  printer.innerHTML = "";
+
+  apiFullTransactionLog(user.username, user.password, x => {
+    if (x) {
+      x.forEach(i => {
+        printer.innerHTML += adminDisplayTransaction(i);
+      });
+      printer.innerHTML = `<div class="row">${printer.innerHTML}</div>`;
+    } else reset();
+  });
+}
+
+function getFilteredTransactionsLog() {
+  filterStageOne(x => {
+    filterStageTwo(x,
+      filteredTransactionsLog);
+  });
+}
+
+function filterStageOne(call) {
+  document.getElementById("InjectableBody").innerHTML = filterStageOneHTML();
+
+  ["transactionID", "type", "customerID", "accountID"].forEach(method => {
+    document.getElementById(method).addEventListener("click", () => call(method))
+  });
+}
+
+function filterStageTwo(method, call) {
+  if (method == "type") {
+    document.getElementById("InjectableBody").innerHTML = transactionTypeMenu();
+    ["exchange", "deposit", "withdrawal"].forEach(variable => {
+      document.getElementById(variable).addEventListener("click", () => call(method, variable))
+    });
+  } else {
+    document.getElementById("InjectableBody").innerHTML = IDform();
+    document.forms[0].addEventListener("submit", function (event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+      call(method, formData.get("id"));
+    });
+  }
+}
+
+function filteredTransactionsLog(method, variable) {
+  let printer = document.getElementById("InjectableBody");
+  printer.innerHTML = "";
+
+  apiFilteredTransactionLog(user.username, user.password, method, variable, x => {
+    if (x) {
+      x.forEach(i => {
+        printer.innerHTML += adminDisplayTransaction(i);
+      });
+      printer.innerHTML = `<div class="row">${printer.innerHTML}</div>`;
+    } else reset();
+  });
 }
 
 function logout() {
   user = null;
+  admin = false;
   reset();
 }
 
@@ -414,6 +625,56 @@ function apiAcceptTransaction(username, password, id) {
 function apiDenyTransaction(username, password, id) {
   fetch(APIUrl + `transactions/${username}/${password}/${id}`,
     { method: "DELETE" });
+}
+
+function apiAdminLogin(username, password, call) {
+  fetch(APIUrl + `admin/login/${username}/${password}`,
+    { method: "GET" })
+    .then((Response) => Response.json())
+    .then((x) => call(x))
+    .catch(() => call(null));
+}
+
+function apiAdminListUsers(username, password, call) {
+  fetch(APIUrl + `admin/users/${username}/${password}`,
+    { method: "GET" })
+    .then((Response) => Response.json())
+    .then((x) => call(x))
+    .catch(() => call(null));
+}
+
+function apiAdminListUserAccounts(username, password, id, call) {
+  fetch(APIUrl + `admin/accounts/${username}/${password}/${id}`,
+    { method: "GET" })
+    .then((Response) => Response.json())
+    .then((x) => call(x))
+    .catch(() => call(null));
+}
+
+function apiAcceptAccount(username, password, id) {
+  fetch(APIUrl + `admin/accounts/${username}/${password}/${id}`,
+    { method: "PUT" });
+}
+
+function apiDenyAccount(username, password, id) {
+  fetch(APIUrl + `admin/accounts/${username}/${password}/${id}`,
+    { method: "DELETE" });
+}
+
+function apiFullTransactionLog(username, password, call) {
+  fetch(APIUrl + `admin/transactions/${username}/${password}`,
+    { method: "GET" })
+    .then((Response) => Response.json())
+    .then((x) => call(x))
+    .catch(() => call(null));
+}
+
+function apiFilteredTransactionLog(username, password, method, variable, call) {
+  fetch(APIUrl + `admin/transactionsFiltered/${username}/${password}/${method}/${variable}`,
+    { method: "GET" })
+    .then((Response) => Response.json())
+    .then((x) => call(x))
+    .catch(() => call(null));
 }
 
 /////////////////////////
