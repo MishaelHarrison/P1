@@ -38,8 +38,8 @@ public class seedData {
             "INSERT INTO p0.accounts\n" +
             "(accounttype, balance, userid, approved, activatorid)\n" +
             "VALUES('checking', randMon(100, 90), 1, true, 5),\n" +
-            "('saveings', randMon(10000, 9000), 1, true, 5),\n" +
-            "('buisiness', randMon(2,0), 2, true, 6),\n" +
+            "('saveings', randMon(10000, 9000), 1, true, 6),\n" +
+            "('buisiness', randMon(2,0), 2, true, 5),\n" +
             "('personal', randMon(1000000,900000), 2, true, 6),\n" +
             "('worldDominationFunds', 2, 1, false, null),\n" +
             "('newPhoneFunds', 60, 2, false, null);\n" +

@@ -3,6 +3,7 @@ package PZero.Libs;
 import Exceptions.BadLogin;
 import Exceptions.BusinessException;
 import Exceptions.InsufficientFunds;
+import Exceptions.NoError;
 import Interfaces.IBusinessLogic;
 import Interfaces.IUserFront;
 import Models.*;
@@ -32,19 +33,41 @@ public class UserFront implements IUserFront {
 
     @Override
     public void start() {
-        app.before(ctx -> System.out.println(ctx.url()));
+        app.before(ctx -> log.trace("Received HTTP request: "+ctx.url()));
 
         //establish connection is good
         app.get("/yo_we_good",ctx -> {
+            log.trace("validating connection");
             ctx.json("yea we good");
         });
 
         //basic login
         //(username, password)
         app.get("/user/*/*",ctx -> {
+
+            //doing to test that the front end properly shows errors
+            try {
+                if (ctx.splat(0).equals("buggy"))
+                    throw new BusinessException("I done did broke everything for you, your welcome");
+                if (ctx.splat(0).equals("wapol"))
+                    throw new Exception("I done did broke everything for you, your welcome");
+            }catch (BusinessException e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+                return;
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
+                return;
+            }
+
             user user = logic.login(ctx.splat(0), ctx.splat(1));
             if(user == null){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }else {
                 user.setPendingCount(logic.getPendingTransactions(user).size());
                 ctx.json(user);
@@ -61,29 +84,44 @@ public class UserFront implements IUserFront {
                     ctx.splat(1)
             );
             if(logic.isUsernameTaken(user.getUsername())){
+                log.warn("attempted to assign non-unique username");
                 ctx.status(400);
-                return;
+                ctx.json(new ErrorResponse(new NoError(), "Username taken"));
             }
             try{
                 logic.addUser(user);
                 ctx.json(logic.login(user.getUsername(), user.getPassword()));
             }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
         //get all users accounts
         //(username, password)
         app.get("/accounts/*/*",ctx -> {
-            ArrayList<account> ret = null;
+            ArrayList<account> ret;
             try{
                 ret = logic.getUserAccounts(logic.login(ctx.splat(0), ctx.splat(1)));
                 ctx.json(ret);
             }
             catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -112,13 +150,25 @@ public class UserFront implements IUserFront {
                 ctx.status(200);
             }
             catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             } catch (InsufficientFunds e) {
+                log.warn("attempted a transaction with insufficient funds");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "insufficient funds"));
             } catch (NumberFormatException e) {
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
             }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -131,11 +181,21 @@ public class UserFront implements IUserFront {
                 logic.addAccount(user, ctx.splat(2), Double.parseDouble(ctx.splat(3)));
             }
             catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
             }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -148,11 +208,21 @@ public class UserFront implements IUserFront {
                 ctx.json(logic.transactionsFromAccount(user, Integer.parseInt(ctx.splat(2))));
             }
             catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
             }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -165,11 +235,21 @@ public class UserFront implements IUserFront {
                 ctx.json(logic.getPendingTransactions(user));
             }
             catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
             }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -181,13 +261,25 @@ public class UserFront implements IUserFront {
                 if (user == null) throw new BadLogin();
                 logic.approveTransaction(Integer.parseInt(ctx.splat(2)));
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
             }catch (InsufficientFunds insufficientFunds) {
+                log.warn("attempted a transaction with insufficient funds");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "insufficient funds"));
             }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -199,11 +291,21 @@ public class UserFront implements IUserFront {
                 if (user == null) throw new BadLogin();
                 logic.denyTransaction(Integer.parseInt(ctx.splat(2)));
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
-            } catch (BusinessException e){
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
+            }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -215,11 +317,21 @@ public class UserFront implements IUserFront {
                 if (admin == null) throw new BadLogin();
                 ctx.json(admin);
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
-            } catch (BusinessException e){
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
+            }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -230,13 +342,21 @@ public class UserFront implements IUserFront {
                 ArrayList<transaction> log = logic.getTransactionLog(ctx.splat(0), ctx.splat(1));
                 ctx.json(log);
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
-            } catch (BusinessException e){
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
+            }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
-            } catch (Throwable e){
-                System.out.println(e.getMessage());
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -248,14 +368,21 @@ public class UserFront implements IUserFront {
                         ctx.splat(2), ctx.splat(3));
                 ctx.json(log);
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
-            } catch (BusinessException e){
-                System.out.println(e.getCause());
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
+            }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
-            } catch (Throwable e){
-                System.out.println(e.getMessage());
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -266,11 +393,21 @@ public class UserFront implements IUserFront {
                 ArrayList<user> log = logic.getAllUsers(ctx.splat(0), ctx.splat(1));
                 ctx.json(log);
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
-            } catch (BusinessException e){
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
+            }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -281,11 +418,21 @@ public class UserFront implements IUserFront {
                 ArrayList<account> log = logic.getUserAccounts(ctx.splat(0), ctx.splat(1), Integer.parseInt(ctx.splat(2)));
                 ctx.json(log);
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
-            } catch (BusinessException e){
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
+            }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -295,11 +442,21 @@ public class UserFront implements IUserFront {
             try{
                 logic.approveAccount(ctx.splat(0), ctx.splat(1), Integer.parseInt(ctx.splat(2)));
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
-            } catch (BusinessException e){
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
+            }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
@@ -309,17 +466,34 @@ public class UserFront implements IUserFront {
             try{
                 logic.denyAccount(ctx.splat(0), ctx.splat(1), Integer.parseInt(ctx.splat(2)));
             }catch (BadLogin e){
+                log.warn("attempted an action with invalid login credentials");
                 ctx.status(400);
+                ctx.json(new ErrorResponse(new NoError(), "Bad login"));
             }catch (NumberFormatException e){
+                log.warn("made http call with invalid formatting");
                 ctx.status(400);
-            } catch (BusinessException e){
+                ctx.json(new ErrorResponse(new NoError(), "invalid formatting"));
+            }catch (BusinessException e){
+                log.error(e);
                 ctx.status(500);
+                ctx.json(new ErrorResponse(e, "SQL Error"));
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
             }
         });
 
         //seed the database
         app.post("/seed",ctx -> {
-            seedData.reset();
+            try{
+                seedData.reset();
+                ctx.status(200);
+            }catch (Exception e){
+                log.error(e);
+                ctx.status(500);
+                ctx.json(new ErrorResponse(e, "Server Error"));
+            }
         });
     }
 }

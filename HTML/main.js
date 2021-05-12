@@ -220,7 +220,7 @@ function displayPendingTransaction(t) {
   account: ${t.acceptingAccountName}<br>
   issuer: ${t.issuingFname}, ${t.issuingLname}<br>
   amount: ${t.amount}<br><br>
-  <button type="button" class="btn btn-success" onclick="acceptTransaction(${t.pendingTransactionID})">Accept Transaction</button>
+  <button type="button" class="btn btn-success" onclick="acceptTransaction(${t.pendingTransactionID})">Accept Transaction</button><br><br>
   <button type="button" class="btn btn-danger" onclick="denyTransaction(${t.pendingTransactionID})">Deny Transaction</button>`;
 }
 
@@ -244,17 +244,16 @@ function adminMenuHTML() {
 ///main injectors//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function reset() {
+function reset(didThingsGoWrong) {
   apiCheckIn(() => {
+    document.getElementById("InjectableBody").innerHTML = "";
     if (user) {
       if (!admin) {
-        document.getElementById("InjectableBody").innerHTML = "";
         document.getElementById("greetings").innerText =
           " " + user.fname + " " + user.lname;
         listUsersAccounts();
         document.getElementById("logoutButton").innerHTML = `<button type="button" class="btn btn-primary" onclick="logout()">logout</button>`;
       } else {
-        document.getElementById("InjectableBody").innerHTML = "";
         document.getElementById("greetings").innerText =
           " employee " + user.fname + " " + user.lname;
         document.getElementById("logoutButton").innerHTML = `<button type="button" class="btn btn-primary" onclick="logout()">logout</button>`;
@@ -264,6 +263,10 @@ function reset() {
       document.getElementById("greetings").innerText = "";
       document.getElementById("logoutButton").innerHTML = "";
       login();
+    }
+    if (didThingsGoWrong) {
+      printer = document.getElementById("InjectableBody");
+      printer = `<div style="color:red;">an encountered error was not recoverable</div>`;
     }
   }, () => {
     document.getElementById("InjectableBody").innerHTML = `<h3 style="color:red;">Cant connect to server</h3>`;
@@ -388,12 +391,14 @@ function login() {
     event.preventDefault();
     const formData = new FormData(this);
     apiLogin(formData.get("username"), formData.get("password"), (x) => {
-      if (x) {
-        user = x;
-        reset();
-      } else {
+      user = x;
+      reset();
+    }, x => {
+      if (x.message = "Bad login") {
         document.getElementById("errorNotification").innerText =
-          "username/password not found, try again";
+          "Invalid username/password";
+      } else {
+        reset();
       }
     });
   });
@@ -410,6 +415,11 @@ function newUser() {
         formData.get("fname"), formData.get("lname"), x => {
           user = x;
           reset();
+        }, x => {
+          if (x.message == "Username taken") {
+            document.getElementById("errorNotification").innerText =
+              "username taken";
+          }
         });
     } else {
       document.getElementById("errorNotification").innerText =
@@ -426,13 +436,15 @@ function adminLogin() {
     event.preventDefault();
     const formData = new FormData(this);
     apiAdminLogin(formData.get("username"), formData.get("password"), (x) => {
-      if (x) {
-        user = x;
-        admin = true;
-        reset();
-      } else {
+      user = x;
+      admin = true;
+      reset();
+    }, x => {
+      if (x.message = "Bad login") {
         document.getElementById("errorNotification").innerText =
-          "username/password not found, try again";
+          "Invalid username/password";
+      } else {
+        reset();
       }
     });
   });
@@ -543,6 +555,12 @@ function filteredTransactionsLog(method, variable) {
   });
 }
 
+function showBadError(error) {
+  document.getElementById("InjectableBody").innerHTML = `
+    <div style="color:red;"><h4>${error.message}</h4>
+    <br><br>Error:<br><pre>${JSON.stringify(error.error, undefined, 2)}</pre></div>`;
+}
+
 function logout() {
   user = null;
   admin = false;
@@ -552,6 +570,74 @@ function logout() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///api calls//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function apiLogin(username, password, call, badCall) {
+  apiCall("GET", `user/${username}/${password}`, call, badCall);
+}
+
+function apiCreateUser(username, password, fname, lname, call, badCall) {
+  apiCall("POST", `user/${username}/${password}/${fname}/${lname}`, call, badCall);
+}
+
+function apiUsersAccounts(username, password, call) {
+  apiCall("GET", `accounts/${username}/${password}`, call);
+}
+
+function apiNewAccount(username, password, accountName, startingBalance) {
+  apiCall("POST", `accounts/${username}/${password}/${accountName}/${startingBalance}`);
+}
+
+function apiCash(username, password, ammount, isDeposit, id) {
+  apiCall("POST", `transactions/${username}/${password}/${id}/${ammount}/${isDeposit ? "deposit" : "withdrawal"}`);
+}
+
+function apiExchange(username, password, ammount, issueingID, recievingID) {
+  apiCall("POST", `transactions/${username}/${password}/${issueingID}/${ammount}/${recievingID}`);
+}
+
+function apiAccountTransactionHistory(username, password, id, call) {
+  apiCall("GET", `transactions/${username}/${password}/${id}`, call);
+}
+
+function apiUserPending(username, password, call) {
+  apiCall("GET", `transactions/${username}/${password}`, call);
+}
+
+function apiAcceptTransaction(username, password, id) {
+  apiCall("PUT", `transactions/${username}/${password}/${id}`);
+}
+
+function apiDenyTransaction(username, password, id) {
+  apiCall("DELETE", `transactions/${username}/${password}/${id}`);
+}
+
+function apiAdminLogin(username, password, call, badCall) {
+  apiCall("GET", `admin/login/${username}/${password}`, call, badCall);
+}
+
+function apiAdminListUsers(username, password, call) {
+  apiCall("GET", `admin/users/${username}/${password}`, call);
+}
+
+function apiAdminListUserAccounts(username, password, id, call) {
+  apiCall("GET", `admin/accounts/${username}/${password}/${id}`, call);
+}
+
+function apiAcceptAccount(username, password, id) {
+  apiCall("PUT", `admin/accounts/${username}/${password}/${id}`);
+}
+
+function apiDenyAccount(username, password, id) {
+  apiCall("DELETE", `admin/accounts/${username}/${password}/${id}`);
+}
+
+function apiFullTransactionLog(username, password, call) {
+  apiCall("GET", `admin/transactions/${username}/${password}`, call);
+}
+
+function apiFilteredTransactionLog(username, password, method, variable, call) {
+  apiCall("GET", `admin/transactionsFiltered/${username}/${password}/${method}/${variable}`, call);
+}
 
 function apiCheckIn(good, bad) {
   fetch(APIUrl + `yo_we_good`,
@@ -564,117 +650,33 @@ function apiCheckIn(good, bad) {
     .catch(() => bad());
 }
 
-function apiLogin(username, password, call) {
-  fetch(APIUrl + `user/${username}/${password}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x))
-    .catch(() => call(null));
-}
+function apiCall(method, urlExt, call, badCall) {
+  let status;
 
-function apiCreateUser(username, password, fname, lname, call) {
-  fetch(APIUrl + `user/${username}/${password}/${fname}/${lname}`,
-    { method: "POST" })
-    .then((Response) => Response.json())
-    .then((x) => call(x))
-    .catch(() => call(null));
-}
-
-function apiUsersAccounts(username, password, call) {
-  fetch(APIUrl + `accounts/${username}/${password}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x))
-    .catch(() => call(null));
-}
-
-function apiNewAccount(username, password, accountName, startingBalance) {
-  fetch(APIUrl + `accounts/${username}/${password}/${accountName}/${startingBalance}`,
-    { method: "POST" });
-}
-
-function apiCash(username, password, ammount, isDeposit, id, call) {
-  fetch(APIUrl + `transactions/${username}/${password}/${id}/${ammount}/${isDeposit ? "deposit" : "withdrawal"}`,
-    { method: "POST" });
-}
-
-function apiExchange(username, password, ammount, issueingID, recievingID, call) {
-  fetch(APIUrl + `transactions/${username}/${password}/${issueingID}/${ammount}/${recievingID}`,
-    { method: "POST" });
-}
-
-function apiAccountTransactionHistory(username, password, id, call) {
-  fetch(APIUrl + `transactions/${username}/${password}/${id}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x));
-}
-
-function apiUserPending(username, password, call) {
-  fetch(APIUrl + `transactions/${username}/${password}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x));
-}
-
-function apiAcceptTransaction(username, password, id) {
-  fetch(APIUrl + `transactions/${username}/${password}/${id}`,
-    { method: "PUT" });
-}
-
-function apiDenyTransaction(username, password, id) {
-  fetch(APIUrl + `transactions/${username}/${password}/${id}`,
-    { method: "DELETE" });
-}
-
-function apiAdminLogin(username, password, call) {
-  fetch(APIUrl + `admin/login/${username}/${password}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x))
-    .catch(() => call(null));
-}
-
-function apiAdminListUsers(username, password, call) {
-  fetch(APIUrl + `admin/users/${username}/${password}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x))
-    .catch(() => call(null));
-}
-
-function apiAdminListUserAccounts(username, password, id, call) {
-  fetch(APIUrl + `admin/accounts/${username}/${password}/${id}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x))
-    .catch(() => call(null));
-}
-
-function apiAcceptAccount(username, password, id) {
-  fetch(APIUrl + `admin/accounts/${username}/${password}/${id}`,
-    { method: "PUT" });
-}
-
-function apiDenyAccount(username, password, id) {
-  fetch(APIUrl + `admin/accounts/${username}/${password}/${id}`,
-    { method: "DELETE" });
-}
-
-function apiFullTransactionLog(username, password, call) {
-  fetch(APIUrl + `admin/transactions/${username}/${password}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x))
-    .catch(() => call(null));
-}
-
-function apiFilteredTransactionLog(username, password, method, variable, call) {
-  fetch(APIUrl + `admin/transactionsFiltered/${username}/${password}/${method}/${variable}`,
-    { method: "GET" })
-    .then((Response) => Response.json())
-    .then((x) => call(x))
-    .catch(() => call(null));
+  fetch(APIUrl + urlExt, { method: method })
+    .then((Response) => {
+      status = Response.status;
+      return Response.json();
+    })
+    .then(x => {
+      if (status < 400) {
+        if (call) {
+          call(x);
+        }
+      } else if (status >= 400 && status < 500 && x.error) {
+        if (badCall) {
+          badCall(x);
+        } else if (x.message = "Bad login") {
+          logout();
+        } else {
+          showBadError(x);
+        }
+      } else if (status < 600 && x.error) {
+        showBadError(x);
+      } else {
+        reset(true);
+      }
+    });
 }
 
 /////////////////////////

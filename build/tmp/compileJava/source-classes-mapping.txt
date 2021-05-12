@@ -32,8 +32,12 @@ Interfaces/IBusinessLogic.java
  Interfaces.IBusinessLogic
 PZero/Libs/BusinessLogic.java
  PZero.Libs.BusinessLogic
+Models/ErrorResponse.java
+ Models.ErrorResponse
 PZero/Main.java
  PZero.Main
+Exceptions/NoError.java
+ Exceptions.NoError
 PZero/Libs/DAO/seedData.java
  PZero.Libs.DAO.seedData
 PZero/Libs/UserFront.java
