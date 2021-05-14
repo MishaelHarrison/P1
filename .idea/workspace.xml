@@ -4,23 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d69b558-00a1-4f04-97c3-3b5011575595" name="Default Changelist" comment="functionally completed all user stories">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Exceptions/NoError.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Models/ErrorResponse.java" afterDir="false" />
+    <list default="true" id="1d69b558-00a1-4f04-97c3-3b5011575595" name="Default Changelist" comment="implemented more gracefully error handling to the front end as well as slight code modifications">
+      <change afterPath="$PROJECT_DIR$/src/test/java/BusinessLogicTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/6.7/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/javaCompile/classAnalysis.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/6.7/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/javaCompile/javaCompile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.7/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.7/javaCompile/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HTML/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/HTML/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/UserFront.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/UserFront.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/source-classes-mapping.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/source-classes-mapping.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PZero/Libs/DAO/seedData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PZero/Libs/DAO/seedData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PZero/Libs/UserFront.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PZero/Libs/UserFront.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/DAO/seedData.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/PZero/Libs/DAO/seedData.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +54,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../usf_bsn_cts_cdi_10week/Week4 - Devops,AWS &amp; Hibernate/hibernate_demo-2" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../P0" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -72,7 +68,7 @@
       <recent name="" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Gradle.BusinessLogicTest">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="PZero.Main" />
       <module name="P1.main" />
@@ -86,8 +82,52 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="BusinessLogicTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;BusinessLogicTest&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="BusinessLogicTest.testGetTransactionLog" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;BusinessLogicTest.testGetTransactionLog&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.BusinessLogicTest" />
+        <item itemvalue="Gradle.BusinessLogicTest.testGetTransactionLog" />
         <item itemvalue="Application.Main" />
       </list>
     </recent_temporary>
@@ -199,7 +239,14 @@
       <option name="project" value="LOCAL" />
       <updated>1620608074760</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="implemented more gracefully error handling to the front end as well as slight code modifications">
+      <created>1620863609807</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1620863609807</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -222,6 +269,7 @@
     <MESSAGE value="finished customer-related user stories" />
     <MESSAGE value="implemented admin-based http endpoints" />
     <MESSAGE value="functionally completed all user stories" />
-    <option name="LAST_COMMIT_MESSAGE" value="functionally completed all user stories" />
+    <MESSAGE value="implemented more gracefully error handling to the front end as well as slight code modifications" />
+    <option name="LAST_COMMIT_MESSAGE" value="implemented more gracefully error handling to the front end as well as slight code modifications" />
   </component>
 </project>
